@@ -19,5 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('order',[OrdersController::class , 'index']);
-Route::post('order',[OrdersController::class , 'create']);
+Route::post('/',[OrdersController::class , 'index']);
+Route::post('/order',[OrdersController::class , 'create']);
+
+//mark as done
+Route::put('/orders/{orderId}/mark-as-done', [OrdersController::class,'markAsDone']);
+// mark as on service
+Route::put('/orders/{orderId}/mark-as-on-service', [OrdersController::class,'markAsOnService']);
+// mark as repaired
+Route::put('/orders/{orderId}/mark-as-repaired', 'OrdersController@markAsRepaired');

@@ -1,105 +1,157 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\orders;
-use App\Models\customer;
+use Carbon\Carbon;
+use App\Models\Device;
+use App\Models\Orders;
+use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreordersRequest;
-use App\Http\Requests\UpdateordersRequest;
-use App\Models\device;
+use App\Http\Requests\StoreOrdersRequest;
+use App\Http\Requests\UpdateOrdersRequest;
 
 class OrdersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
+        $this->validate($request, [
+            'phone' => 'required'
+        ]);
+
+        $customer = Customer::where('phone', $request->phone)->first();
+        $customerIds = Customer::where('phone', $request->phone)->pluck('cust_id');
+        $devices = Device::whereIn('cust_id', $customerIds)->get();
+        $orders = Orders::whereIn('cust_id', $customerIds)->get();
+
+        $groupedDevices = [];
+        foreach ($devices as $device) {
+            $groupId = $device->device_id;
+            $groupedDevices[$groupId][] = $device;
+        }
+
+        $ordersWithDevices = [];
+        foreach ($orders as $order) {
+            $orderId = $order->device_id;
+            $orderArray = $order->toArray();
+
+            if (isset($groupedDevices[$orderId])) {
+                $orderArray['devices'] = $groupedDevices[$orderId];
+            } else {
+                $orderArray['devices'] = [];
+            }
+
+            $ordersWithDevices[] = $orderArray;
+        }
+
         return response()->json([
-            'data' => Orders::all()
+            'customer' => $customer,
+            'orders' => $ordersWithDevices
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
-        $this->validate($request,[
+        $this->validate($request, [
             'name' => 'required',
             'phone' => 'required',
-            'adress' => 'required',
+            'address' => 'required',
             'product' => 'required',
             'type' => 'required',
             'damage' => 'required',
-            'status' => 'required',
+            'condition' => 'required',
             'price' => 'required',
         ]);
 
-        customer::create([
+        $customer = Customer::create([
             'name' => $request->name,
             'phone' => $request->phone,
-            'adress' => $request->adress,
+            'address' => $request->address,
         ]);
-        $cust_id = customer::latest()->first();
-        $cust_id = $cust_id->cust_id;
 
-        device::create([
+        $cust_id = $customer->cust_id;
+
+        $device = Device::create([
             'cust_id' => $cust_id,
             'product' => $request->product,
             'type' => $request->type,
             'damage' => $request->damage,
         ]);
 
-        $device_id = device::latest()->first();
-        $device_id = $device_id->device_id;
+        $device_id = $device->device_id;
+        $mytime = Carbon::now();
 
-        orders::create([
+        Orders::create([
             'cust_id' => $cust_id,
             'device_id' => $device_id,
-            'status' => $request->status,
-
+            'condition' => $request->condition,
+            'status' => 'queue',
+            'date' => $mytime
         ]);
 
+        return response()->json(['ok']);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreordersRequest $request)
+    public function markAsDone(Request $request, $orderId)
+    {
+        $order = Orders::where('orders_id', $orderId)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $order->status = 'done';
+        $order->save();
+
+        return response()->json(['message' => 'Order status updated to "done"']);
+    }
+
+    public function markAsOnService(Request $request, $orderId)
+    {
+        $order = Orders::where('orders_id', $orderId)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $order->status = 'on service';
+        $order->save();
+
+        return response()->json(['message' => 'Order status updated to "on service"']);
+    }
+    public function markAsRepaired(Request $request, $orderId)
+    {
+        $order = Orders::where('order_id', $orderId)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $order->status = 'repaired';
+        $order->save();
+
+        return response()->json(['message' => 'Order status updated to "repaired"']);
+    }
+
+    public function store(StoreOrdersRequest $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(orders $orders)
+    public function show(Orders $orders)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(orders $orders)
+    public function edit(Orders $orders)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateordersRequest $request, orders $orders)
+    public function update(UpdateOrdersRequest $request, Orders $orders)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(orders $orders)
+    public function destroy(Orders $orders)
     {
         //
     }
