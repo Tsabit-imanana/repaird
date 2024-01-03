@@ -18,13 +18,21 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+//cari order
 Route::post('/',[OrdersController::class , 'index']);
-Route::post('/order',[OrdersController::class , 'create']);
+
+
+//SERVICE
+
+// mark as on service (ambil order)
+Route::put('/orders/{orderId}/mark-as-on-service', [OrdersController::class,'markAsOnService']);
+// mark as repaired
+Route::put('/orders/{orderId}/mark-as-repaired', [OrdersController::class,'markAsRepaired']);
+
+
+//CS
 
 //mark as done
 Route::put('/orders/{orderId}/mark-as-done', [OrdersController::class,'markAsDone']);
-// mark as on service
-Route::put('/orders/{orderId}/mark-as-on-service', [OrdersController::class,'markAsOnService']);
-// mark as repaired
-Route::put('/orders/{orderId}/mark-as-repaired', 'OrdersController@markAsRepaired');
+//create order
+Route::post('/order',[OrdersController::class , 'create']);

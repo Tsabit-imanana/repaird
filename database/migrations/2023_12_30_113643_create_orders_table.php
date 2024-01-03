@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('date');
             $table->integer('user_id')->nullable();
             $table->string('status');
+            $table->bigInteger('price');
             $table->timestamps();
         });
     }
