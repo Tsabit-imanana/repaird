@@ -20,4 +20,14 @@ class orders extends Model
         'price',
         'status'
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'cust_id');
+    }
+
+    public function device()
+    {
+        return $this->belongsTo(Device::class, 'device_id');
+    }
 }

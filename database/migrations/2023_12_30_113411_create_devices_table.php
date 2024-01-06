@@ -10,16 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('devices', function (Blueprint $table) {
-            $table->id('device_id');
-            $table->integer('cust_id');
-            $table->string('product');
-            $table->string('type');
-            $table->string('damage');
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('devices', function (Blueprint $table) {
+        $table->id('device_id');
+        $table->unsignedBigInteger('cust_id');
+        $table->string('product');
+        $table->string('type');
+        $table->string('damage');
+        $table->timestamps();
+
+        // Menambahkan foreign key constraint
+        $table->foreign('cust_id')->references('cust_id')->on('customers')->onDelete('cascade');
+    });
+}
+
 
     /**
      * Reverse the migrations.
