@@ -20,11 +20,11 @@ class RepairController extends Controller
         if (!$order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
-
+        
         // Jika status sudah 'on service', kembalikan respons khusus
         if ($order->status === 'on_service') {
             return response()->json([
-                'message' => 'Order status is already "on service"',
+                'message' => 'Order status is already on servic',
             ]);
         }
 
