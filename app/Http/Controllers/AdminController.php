@@ -63,5 +63,20 @@ class AdminController extends Controller
         ]);
     }
     
+    public function delete($id){
+        $user = User::find($id);
+
+if ($user) {
+    // If the user exists, delete it
+    $user->delete();
+    return response()->json([
+        "User Deleted"
+    ]);
+} else {
+    return response()->json([
+        "User Not found"
+    ]);
+}
+    }
 
 }

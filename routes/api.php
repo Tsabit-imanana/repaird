@@ -55,5 +55,5 @@ Route::post('/orders/status',[ManagerController::class,'showByStatus']);
 //ADMIN
 Route::get('/users',[AdminController::class,'showuser']); //list user
 Route::post('/user',[AdminController::class, 'store']);//add user
-Route::put('user/{id}',[AdminController::class, 'update']);
-
+Route::put('/user/{id}',[AdminController::class, 'update']);
+Route::delete('user/{id}', [AdminController::class , 'delete']);
